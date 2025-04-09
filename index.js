@@ -1,5 +1,6 @@
 import Point from "./point.js";
 import PostItManager from "./postitManager.js";
+import PostIt from "./postit.js";
 
 const POSTIT_WIDTH = 130;
 const POSTIT_HEIGHT = 200;
@@ -11,10 +12,8 @@ class App {
     this.ctx = this.canvas.getContext("2d");
 
     this.mouse = new Point();
-    this.postitManager = new PostItManager({
-      width: POSTIT_WIDTH,
-      height: POSTIT_HEIGHT,
-    });
+    this.postitManager = new PostItManager();
+
     this.resize();
     window.addEventListener("resize", this.resize.bind(this));
 
@@ -31,7 +30,7 @@ class App {
     this.canvas.width = this.stageWidth;
     this.canvas.height = this.stageHeight;
 
-    this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    // this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
   }
 
   animate() {
@@ -48,7 +47,16 @@ class App {
   }
 
   onClick() {
-    this.postitManager.add(this.mouse);
+    this.postitManager.add(
+      new PostIt({
+        x: this.mouse.x,
+        y: this.mouse.y,
+        width: POSTIT_WIDTH,
+        height: POSTIT_HEIGHT,
+        fold: 30,
+        color: "rgb(255, 255, 255)",
+      })
+    );
   }
 }
 

@@ -1,10 +1,6 @@
-import PostIt from "./postit.js";
-
 export default class PostItManager {
-  constructor({ number = 0, width = 200, height = 200 }) {
-    this.posts = Array.from({ length: number }, () => new PostIt({}));
-    this.w = width;
-    this.h = height;
+  constructor() {
+    this.posts = [];
   }
 
   animate(ctx) {
@@ -19,9 +15,7 @@ export default class PostItManager {
     }
   }
 
-  add(pos) {
-    this.posts.push(
-      new PostIt({ x: pos.x, y: pos.y, width: this.w, height: this.h })
-    );
+  add(postit) {
+    this.posts.push(postit);
   }
 }
