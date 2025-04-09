@@ -1,5 +1,8 @@
 import Point from "./point.js";
-import PostIt from "./postit.js";
+import PostItManager from "./postitManager.js";
+
+const POSTIT_WIDTH = 130;
+const POSTIT_HEIGHT = 200;
 
 class App {
   constructor() {
@@ -8,16 +11,15 @@ class App {
     this.ctx = this.canvas.getContext("2d");
 
     this.mouse = new Point();
-
+    this.postitManager = new PostItManager({
+      width: POSTIT_WIDTH,
+      height: POSTIT_HEIGHT,
+    });
     this.resize();
     window.addEventListener("resize", this.resize.bind(this));
 
-    this.postit = new PostIt({
-      x: this.stageWidth / 2 - 100,
-      y: this.stageHeight / 2 - 100,
-    });
-
     window.addEventListener("mousemove", this.onMove.bind(this));
+    window.addEventListener("mousedown", this.onClick.bind(this));
 
     this.animate();
   }
@@ -29,9 +31,6 @@ class App {
     this.canvas.width = this.stageWidth;
     this.canvas.height = this.stageHeight;
 
-    this.rectX = this.stageWidth / 2;
-    this.rectY = this.stageHeight / 2;
-
     this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
   }
 
@@ -39,21 +38,17 @@ class App {
     window.requestAnimationFrame(this.animate.bind(this));
     this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
 
-    this.postit.animate(this.ctx);
-    if (this.postit.isCollide(this.mouse)) {
-      if (this.postit.animateFold(this.mouse)) {
-        this.postit.unFolding();
-        document.body.style.cursor = "pointer";
-      }
-    } else {
-      this.postit.folding();
-      document.body.style.cursor = "default";
-    }
+    this.postitManager.animate(this.ctx);
+    this.postitManager.animateFolds(this.mouse);
   }
 
   onMove(e) {
     this.mouse.x = e.offsetX;
     this.mouse.y = e.offsetY;
+  }
+
+  onClick() {
+    this.postitManager.add(this.mouse);
   }
 }
 

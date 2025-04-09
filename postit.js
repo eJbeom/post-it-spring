@@ -6,8 +6,8 @@ const DEFAULT_SIZE = 200;
 const DEFAULT_COLOR = "white";
 const DEFAULT_SHADOW_ALPHA = 0.25;
 const DEFAULT_SHADOW_BLUR = 0.8;
-const DEFAULT_GRADIENT_STRENGTH = 0.22;
-const SPRING_FORCE = 0.23;
+const DEFAULT_GRADIENT_STRENGTH = 0.09;
+const SPRING_FORCE = 0.4;
 
 export default class PostIt {
   constructor({
@@ -62,9 +62,17 @@ export default class PostIt {
       this.pos.x,
       this.pos.y + this.h
     );
-    gradient.addColorStop(this.gradientY, "rgba(0,0,0,0)");
-    gradient.addColorStop(1, `rgba(0,0,0,${this.gradientStrength})`);
-
+    gradient.addColorStop(
+      this.gradientY - 0.16,
+      `rgba(0, 0, 0, ${this._gradientStrength / 2})`
+    );
+    gradient.addColorStop(
+      this.gradientY,
+      `rgba(0, 0, 0, ${Math.min(
+        this._gradientStrength / 2,
+        this._gradientStrength - this.gradientStrength
+      )})`
+    );
     return gradient;
   }
 
@@ -82,28 +90,49 @@ export default class PostIt {
 
   animateFold(pos) {
     if (
+      this.isFolded &&
+      this.h <= this._h + this.fold &&
+      this.isFoldCollide(pos)
+    ) {
+      this.unFolding(pos);
+      document.body.style.cursor = "pointer";
+    } else {
+      this.folding(pos);
+      if (Math.round(this.h) === this._h) this.isFolded = true;
+      else this.isFolded = false;
+      document.body.style.cursor = "default";
+    }
+  }
+
+  isFoldCollide(pos) {
+    if (
       pos.x >= this.pos.x &&
       pos.x <= this.pos.x + this.w &&
-      pos.y >= this.pos.y + this.h - this.shadowOffsetY / 2 &&
-      pos.y <= this.pos.y + this._h + this.fold
+      pos.y >= this.pos.y + (this._h - this._shadowOffsetY / 2) &&
+      pos.y <= this.pos.y + this.h
     ) {
       return true;
     }
     return false;
   }
 
-  unFolding() {
-    if (this.h <= this._h + this.fold) {
-      this.h++;
-      this.shadowOffsetY -= this._shadowOffsetY / this.fold;
-      this.gradientStrength -= this._gradientStrength / this.fold;
-      const cal = Math.floor(((1 - this._gradientY) / this.fold) * 1000) / 1000;
-      this.gradientY += cal;
+  unFolding(pos) {
+    if (this.prevY) {
+      const y = pos.y - this.prevY;
+
+      this.h += y;
+      this.shadowOffsetY += y * -1 * (this._shadowOffsetY / this.fold);
+      this.gradientStrength += y * -1 * (this._gradientStrength / this.fold);
+      this.gradientY = Math.min(
+        this.gradientY + y * ((1.0 - this._gradientY) / this.fold),
+        1.0
+      );
     }
+    this.prevY = pos.y;
   }
 
-  folding() {
-    this.h = bogan(this.h, this._h, SPRING_FORCE);
+  folding(pos) {
+    this.h = bogan(this.h, this._h, 0.18);
     this.shadowOffsetY = bogan(
       this.shadowOffsetY,
       this._shadowOffsetY,
@@ -115,5 +144,6 @@ export default class PostIt {
       SPRING_FORCE
     );
     this.gradientY = bogan(this.gradientY, this._gradientY, SPRING_FORCE);
+    this.prevY = pos.y;
   }
 }
