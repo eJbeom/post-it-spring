@@ -5,7 +5,7 @@ const DEFAULT_FOLD = 15;
 const DEFAULT_SIZE = 200;
 const DEFAULT_COLOR = "white";
 const DEFAULT_SHADOW_ALPHA = 0.25;
-const DEFAULT_SHADOW_BLUR = 5;
+const DEFAULT_SHADOW_BLUR = 0.8;
 const DEFAULT_GRADIENT_STRENGTH = 0.12;
 const SPRING_FORCE = 0.4;
 
@@ -63,9 +63,10 @@ export default class PostIt {
       this.pos.x,
       this.pos.y + this.h
     );
+    gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
     gradient.addColorStop(
-      this.gradientY - 0.08,
-      `rgba(0, 0, 0, ${this._gradientStrength / 2})`
+      Math.max(0, this.gradientY - 0.08),
+      `rgba(0, 0, 0, ${this._gradientStrength / 1.24})`
     );
     gradient.addColorStop(
       this.gradientY,
@@ -74,7 +75,7 @@ export default class PostIt {
         this._gradientStrength - this.gradientStrength
       )})`
     );
-    gradient.addColorStop(1, `rgba(0, 0, 0, ${this._gradientStrength / 3})`);
+    gradient.addColorStop(1, `rgba(0, 0, 0, ${this._gradientStrength / 0.74})`);
     return gradient;
   }
 
@@ -129,10 +130,6 @@ export default class PostIt {
         this.gradientY + y * ((1.0 - this._gradientY) / this.fold),
         1.0
       );
-      this.shadowBlur = Math.max(
-        this.shadowBlur + y * -1 * (this._shadowBlur / this.fold) * 1.4,
-        0
-      );
     }
     this.prevY = pos.y;
   }
@@ -150,7 +147,6 @@ export default class PostIt {
       SPRING_FORCE
     );
     this.gradientY = bogan(this.gradientY, this._gradientY, SPRING_FORCE);
-    this.shadowBlur = bogan(this.shadowBlur, this._shadowBlur, SPRING_FORCE);
     this.prevY = pos.y;
   }
 }

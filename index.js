@@ -2,7 +2,7 @@ import Point from "./point.js";
 import PostItManager from "./postitManager.js";
 import PostIt from "./postit.js";
 
-const POSTIT_WIDTH = 130;
+const POSTIT_WIDTH = 200;
 const POSTIT_HEIGHT = 200;
 
 class App {
